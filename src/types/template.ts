@@ -33,12 +33,16 @@ export interface CoupleInfo {
   brideName: string;
   weddingDate: string;
   weddingTime: string;
-  lunarDate: string;
+  lunarDate?: string;
   venueName: string;
   venueAddress: string;
   invitationMessage: string;
+  coverImage?: string; // User uploaded wedding photo (Base64 / Blob URL)
+  themeColor?: string; // Preset accent color
+  fontFamilyChoice?: string;
   bankName?: string;
   bankAccount?: string;
   bankOwner?: string;
   customSong?: string;
+  customAudioUrl?: string; // User uploaded MP3 or chosen track
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Heart, QrCode, Share2, Check, Smartphone, Music2, CheckCircle2 } from 'lucide-react';
+import { X, Heart, QrCode, Share2, Check, Smartphone, Music2, CheckCircle2, Upload } from 'lucide-react';
 import QRCode from 'qrcode';
 import { Template } from '../types/template';
 import { formatCount, getAssetUrl } from '../utils/formatters';
@@ -57,7 +57,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in overflow-y-auto font-sans">
       <div className="relative w-full max-w-5xl bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-800 overflow-hidden flex flex-col lg:flex-row my-auto max-h-[92vh]">
         {/* Close Button */}
         <button
@@ -70,7 +70,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
 
         {/* LEFT / CENTER: Minimalist Mobile Phone Simulator */}
         <div className="flex-1 bg-neutral-950 p-6 sm:p-8 flex flex-col items-center justify-center relative overflow-hidden">
-          {/* Subtle clean background glow */}
+          {/* Background glow */}
           <div className="absolute w-80 h-80 bg-neutral-800/30 rounded-full blur-3xl pointer-events-none" />
 
           {/* Minimalist iPhone Frame Container */}
@@ -175,16 +175,16 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
             </div>
 
             {/* Title */}
-            <h2 className="text-xl font-bold text-white font-serif mb-1">
+            <h2 className="text-xl font-bold text-white font-display mb-1">
               {template.templateName}
             </h2>
 
-            <p className="text-xs text-neutral-400 mb-6">
-              Mã thiết kế: <code className="text-neutral-300 font-mono">{template.slug}</code>
+            <p className="text-xs text-neutral-400 mb-6 font-mono">
+              Mã thiết kế: <code className="text-neutral-300">{template.slug}</code>
             </p>
 
             {/* Stats list */}
-            <div className="grid grid-cols-3 gap-3 p-3 bg-neutral-800/70 rounded-xl border border-neutral-700/60 mb-6 text-center">
+            <div className="grid grid-cols-3 gap-3 p-3 bg-neutral-800/70 rounded-xl border border-neutral-700/60 mb-6 text-center font-mono">
               <div>
                 <span className="block text-base font-bold text-white">
                   {formatCount(template.usageCount)}
@@ -212,7 +212,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                   <Music2 className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-[11px] text-neutral-400">Nhạc nền tích hợp</span>
+                  <span className="block text-[11px] text-neutral-400 font-mono">Nhạc nền tích hợp</span>
                   <span className="text-xs font-semibold text-white">
                     {template.audioTitle || 'Marry You'}
                   </span>
@@ -221,30 +221,31 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
             </div>
 
             {/* Highlights */}
-            <div className="space-y-2 text-xs text-neutral-300 mb-6">
+            <div className="space-y-2 text-xs text-neutral-300 mb-6 font-sans">
               <div className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-neutral-400" />
-                <span>Mẫu thiệp chuẩn phong cách tối giản L-Studio</span>
+                <div className="w-1 h-1 rounded-full bg-emerald-400" />
+                <span>Cho phép tải ảnh dâu rể thật từ máy lên thiệp</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-neutral-400" />
-                <span>Tùy chỉnh thông tin dâu rể và ngày tiệc ngay</span>
+                <div className="w-1 h-1 rounded-full bg-emerald-400" />
+                <span>Hỗ trợ xuất ảnh thiệp HD (PNG) để gửi Zalo</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-neutral-400" />
-                <span>Miễn phí 100% không giới hạn lượt gửi khách</span>
+                <div className="w-1 h-1 rounded-full bg-emerald-400" />
+                <span>Tự động tạo mã chuyển khoản mừng cưới VietQR</span>
               </div>
             </div>
           </div>
 
           {/* Action CTAs */}
           <div className="space-y-2.5 pt-4 border-t border-neutral-800">
+            {/* Primary Action Button: TẢI ẢNH & SỬA THIỆP NGAY */}
             <button
               onClick={() => onUseTemplate(template)}
-              className="w-full bg-white hover:bg-neutral-100 text-neutral-900 font-semibold py-3 px-4 rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all"
+              className="w-full bg-white hover:bg-neutral-100 text-neutral-900 font-semibold py-3 px-4 rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all font-display text-sm"
             >
-              <Sparkles className="w-4 h-4 text-amber-600" />
-              <span>Dùng mẫu này ngay</span>
+              <Upload className="w-4 h-4 text-neutral-900" />
+              <span>Tải ảnh &amp; Sửa thiệp ngay</span>
             </button>
 
             <div className="flex items-center gap-2">

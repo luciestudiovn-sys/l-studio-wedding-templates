@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, Heart, QrCode, Check, Sparkles, Play, Pause } from 'lucide-react';
+import { Eye, Heart, QrCode, Check, Play, Pause, Upload } from 'lucide-react';
 import { Template } from '../types/template';
 import { formatCount, getAssetUrl } from '../utils/formatters';
 
@@ -46,7 +46,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
       {/* Thumbnail Container with hover auto-scroll preview */}
       <div
         onClick={() => onPreview(template)}
-        className="relative h-[360px] sm:h-[400px] bg-neutral-100 overflow-hidden cursor-pointer"
+        className="relative h-[360px] sm:h-[390px] bg-neutral-100 overflow-hidden cursor-pointer"
       >
         {/* Long Image Preview */}
         {!imgError ? (
@@ -133,8 +133,8 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
               }}
               className="flex-1 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold py-2 px-2.5 rounded-lg shadow-sm flex items-center justify-center gap-1 transition-all"
             >
-              <Sparkles className="w-3 h-3 text-amber-300" />
-              <span>Dùng mẫu</span>
+              <Upload className="w-3 h-3 text-amber-300" />
+              <span>Tải ảnh &amp; Sửa</span>
             </button>
 
             <button
@@ -165,8 +165,20 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
           </div>
         </div>
 
+        {/* Prominent Direct Edit & Upload Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onUseTemplate(template);
+          }}
+          className="mt-2.5 w-full py-2 px-3 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-display font-medium flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+        >
+          <Upload className="w-3 h-3 text-amber-300" />
+          <span>Tải ảnh &amp; Sửa thiệp ngay</span>
+        </button>
+
         {/* Stats footer */}
-        <div className="flex items-center justify-between text-[11px] text-neutral-500 font-mono pt-2.5 mt-2.5 border-t border-neutral-100">
+        <div className="flex items-center justify-between text-[11px] text-neutral-500 font-mono pt-2 mt-2 border-t border-neutral-100">
           <span>{formatCount(template.usageCount)} lượt dùng</span>
           <div className="flex items-center gap-2">
             <span>{formatCount(template.viewCount)} xem</span>

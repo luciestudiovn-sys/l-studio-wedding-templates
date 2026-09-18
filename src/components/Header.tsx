@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Menu, X, Sparkles } from 'lucide-react';
+import { Heart, Menu, X, Upload, Sparkles } from 'lucide-react';
 
 interface HeaderProps {
   favoriteCount: number;
@@ -73,8 +73,8 @@ export const Header: React.FC<HeaderProps> = ({ favoriteCount, onOpenFavorites, 
               onClick={onOpenNewBlank}
               className="hidden sm:inline-flex items-center gap-2 bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-sm transition-all"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Tạo thiệp riêng</span>
+              <Upload className="w-3.5 h-3.5 text-amber-300" />
+              <span>Tải ảnh & Sửa thiệp</span>
             </button>
 
             {/* Mobile menu trigger */}
@@ -112,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({ favoriteCount, onOpenFavorites, 
               className="w-full flex items-center justify-center gap-2 bg-neutral-900 text-white font-medium py-2.5 rounded-xl text-sm"
             >
               <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>Tạo thiệp riêng</span>
+              <span>Tải ảnh & Sửa thiệp</span>
             </button>
           </div>
         </div>
