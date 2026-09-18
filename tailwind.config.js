@@ -25,6 +25,9 @@ export default {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         display: ['"Space Grotesk"', 'Inter', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
+        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        script: ['"Alex Brush"', '"Great Vibes"', 'cursive'],
+        cursive: ['"Pinyon Script"', '"Great Vibes"', 'cursive'],
       },
       boxShadow: {
         'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02)',

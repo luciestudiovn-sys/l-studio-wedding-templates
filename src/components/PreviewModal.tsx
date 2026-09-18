@@ -98,13 +98,41 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
 
               {/* Scrollable Invitation Content or QR Code */}
               {activeTab === 'live' ? (
-                <div className="flex-1 relative bg-neutral-900 overflow-hidden">
-                  <iframe
-                    src={`https://cinelove.me/template/iframe/${template.slug}`}
-                    title={template.templateName}
-                    className="w-full h-full border-0 bg-white"
-                    allow="autoplay; clipboard-write"
-                  />
+                <div className="flex-1 overflow-y-auto preview-scrollbar relative bg-neutral-900 select-none">
+                  {/* High-Res Template Artwork Base */}
+                  <div className="relative w-full h-full min-h-[500px]">
+                    <img
+                      src={imgUrl}
+                      alt={template.templateName}
+                      className="w-full h-auto object-cover object-top select-none filter brightness-[0.97]"
+                    />
+
+                    {/* Gradient Overlay & Calligraphy Typography */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50 pointer-events-none flex flex-col justify-between p-4 py-8 text-center text-white">
+                      <div>
+                        <span className="font-script text-3xl text-white drop-shadow-md">
+                          Save The Date
+                        </span>
+                      </div>
+
+                      <div className="space-y-1 pb-10">
+                        <h3 className="font-cursive text-3xl text-white drop-shadow-md">
+                          Thanh Hằng &amp; Minh Trí
+                        </h3>
+                        <p className="font-script text-xl text-white/90 drop-shadow">
+                          Our wedding day &bull; Tháng 12
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Floating interactive music player pill */}
+                  <div className="sticky bottom-4 left-0 right-0 flex justify-center px-4 pointer-events-auto z-20">
+                    <AudioPlayerPill
+                      audioKey={template.audioKey}
+                      audioTitle={template.audioTitle || 'Marry You'}
+                    />
+                  </div>
                 </div>
               ) : activeTab === 'poster' ? (
                 <div className="flex-1 overflow-y-auto preview-scrollbar relative bg-neutral-50">

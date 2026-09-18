@@ -266,17 +266,38 @@ export const LiveInvitationView: React.FC<LiveInvitationViewProps> = ({
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/70 animate-pulse" />
             </div>
 
-            <div className="w-full h-full bg-white rounded-[36px] overflow-hidden relative">
-              <iframe
-                src={`https://cinelove.me/template/iframe/${template.slug}`}
-                title={template.templateName}
-                className="w-full h-full border-0 bg-white"
-                allow="autoplay; clipboard-write"
-              />
+            <div className="w-full h-full bg-neutral-900 rounded-[36px] overflow-hidden relative flex flex-col">
+              <div className="flex-1 overflow-y-auto preview-scrollbar relative bg-neutral-900">
+                <div className="relative w-full h-full min-h-[600px]">
+                  <img
+                    src={templateCoverImg}
+                    alt={template.templateName}
+                    className="w-full h-auto object-cover object-top select-none filter brightness-[0.97]"
+                  />
+
+                  {/* Gradient Overlay & Calligraphy Typography */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/60 pointer-events-none flex flex-col justify-between p-6 py-10 text-center text-white">
+                    <div>
+                      <span className="font-script text-4xl text-white drop-shadow-md">
+                        Save The Date
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 pb-8">
+                      <h3 className="font-cursive text-3xl sm:text-4xl text-white drop-shadow-md">
+                        {coupleInfo.groomName} &amp; {coupleInfo.brideName}
+                      </h3>
+                      <p className="font-script text-2xl text-white/90 drop-shadow">
+                        Our wedding day &bull; {coupleInfo.weddingDate}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <p className="mt-4 text-xs text-neutral-500 text-center font-mono">
-            Hiển thị giao diện tương tác nguyên bản của mẫu: <strong className="text-neutral-800">{template.templateName}</strong>
+            Hiển thị giao diện thiết kế độc bản của mẫu: <strong className="text-neutral-800">{template.templateName}</strong>
           </p>
         </div>
       ) : (
