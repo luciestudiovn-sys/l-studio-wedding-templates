@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #faf9f6;
+    color: #262626;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom scrollbar */
+.preview-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.preview-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.preview-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+}
+
+.preview-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Hover auto-scroll animation for cards */
+.card-long-thumb {
+  transition: transform 6.5s ease-in-out;
+  transform: translateY(0);
+}
+
+.template-card:hover .card-long-thumb {
+  transform: translateY(calc(-100% + 440px));
+}
+
+/* Vinyl rotation animation */
+@keyframes spin-vinyl {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-vinyl {
+  animation: spin-vinyl 6s linear infinite;
+}
+
+.animate-vinyl-paused {
+  animation-play-state: paused;
+}
+
+/* Waveform sound animation */
+@keyframes sound-wave {
+  0%, 100% {
+    height: 4px;
+  }
+  50% {
+    height: 16px;
+  }
+}
+
+.wave-bar {
+  display: inline-block;
+  width: 2.5px;
+  background-color: #ffffff;
+  border-radius: 2px;
+  animation: sound-wave 1s ease-in-out infinite;
+}
+.wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.wave-bar:nth-child(4) { animation-delay: 0.45s; }
+.wave-bar:nth-child(5) { animation-delay: 0.2s; }
