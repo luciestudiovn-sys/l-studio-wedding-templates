@@ -3,7 +3,7 @@ export interface Template {
   templateName: string;
   slug: string;
   categoryId: string;
-  templateType: 'basic' | 'premium' | 'free' | string;
+  templateType: 'basic' | 'premium' | 'free' | 'unlocked' | string;
   thumbnail: string;
   longThumbnail: string;
   viewCount: number;
@@ -15,6 +15,7 @@ export interface Template {
   audioKey?: string;
   audioDuration?: number;
   tags?: string[];
+  styleTag?: string;
   openingEffect?: string;
 }
 
@@ -24,8 +25,6 @@ export interface Category {
   order: number;
   status: string;
 }
-
-export type TemplateFilterType = 'all' | 'basic' | 'premium';
 
 export type SortOption = 'popular' | 'usage' | 'views' | 'newest';
 
@@ -38,5 +37,8 @@ export interface CoupleInfo {
   venueName: string;
   venueAddress: string;
   invitationMessage: string;
+  bankName?: string;
+  bankAccount?: string;
+  bankOwner?: string;
   customSong?: string;
 }

@@ -7,6 +7,7 @@ import { ServiceBanner } from './components/ServiceBanner';
 import { Footer } from './components/Footer';
 import { PreviewModal } from './components/PreviewModal';
 import { QuickEditorModal } from './components/QuickEditorModal';
+import { GlobalMusicPlayer } from './components/GlobalMusicPlayer';
 import templatesData from './data/templates.json';
 import { Template, SortOption } from './types/template';
 import { getFavoriteIds, toggleFavoriteId } from './utils/storage';
@@ -15,13 +16,20 @@ const typedTemplates: Template[] = templatesData as Template[];
 
 export const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedStyle, setSelectedStyle] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortOption, setSortOption] = useState<SortOption>('popular');
   const [showOnlyFavorites, setShowOnlyFavorites] = useState<boolean>(false);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(getFavoriteIds);
+  const [viewMode, setViewMode] = useState<'dense' | 'spacious'>('dense');
 
+  // Modals state
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [editorTemplate, setEditorTemplate] = useState<Template | null>(null);
+
+  // Global Audio Player state
+  const [activeAudioTemplate, setActiveAudioTemplate] = useState<Template | null>(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
 
   // Check URL query param for direct template preview (?template=slug)
   useEffect(() => {
@@ -40,10 +48,23 @@ export const App: React.FC = () => {
     setFavoriteIds(new Set(newFavorites));
   };
 
+  const handlePlaySong = (template: Template) => {
+    if (activeAudioTemplate?.id === template.id) {
+      setIsAudioPlaying(!isAudioPlaying);
+    } else {
+      setActiveAudioTemplate(template);
+      setIsAudioPlaying(true);
+    }
+  };
+
   const filteredTemplates = useMemo(() => {
     return typedTemplates.filter((item) => {
       // Category filter
       if (selectedCategory !== 'all' && item.categoryId !== selectedCategory) {
+        return false;
+      }
+      // Style tag filter
+      if (selectedStyle && item.styleTag !== selectedStyle) {
         return false;
       }
       // Favorites filter
@@ -56,7 +77,8 @@ export const App: React.FC = () => {
         const nameMatch = item.templateName.toLowerCase().includes(q);
         const slugMatch = item.slug.toLowerCase().includes(q);
         const audioMatch = (item.audioTitle || '').toLowerCase().includes(q);
-        if (!nameMatch && !slugMatch && !audioMatch) {
+        const styleMatch = (item.styleTag || '').toLowerCase().includes(q);
+        if (!nameMatch && !slugMatch && !audioMatch && !styleMatch) {
           return false;
         }
       }
@@ -78,17 +100,18 @@ export const App: React.FC = () => {
       }
       return 0;
     });
-  }, [selectedCategory, searchQuery, sortOption, showOnlyFavorites, favoriteIds]);
+  }, [selectedCategory, selectedStyle, searchQuery, sortOption, showOnlyFavorites, favoriteIds]);
 
   const handleResetFilters = () => {
     setSelectedCategory('all');
+    setSelectedStyle('');
     setSearchQuery('');
     setSortOption('popular');
     setShowOnlyFavorites(false);
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#faf9f6] text-neutral-800 selection:bg-neutral-200 selection:text-neutral-900">
+    <div className="min-h-screen flex flex-col bg-[#faf9f6] text-neutral-800 selection:bg-neutral-200 selection:text-neutral-900 font-sans">
       {/* Header */}
       <Header
         favoriteCount={favoriteIds.size}
@@ -100,8 +123,14 @@ export const App: React.FC = () => {
         }}
       />
 
-      {/* Hero Section */}
-      <HeroSection totalCount={typedTemplates.length} />
+      {/* Hero Section with Spotlight Card */}
+      <HeroSection
+        totalCount={typedTemplates.length}
+        spotlightTemplate={typedTemplates[0]}
+        onPreviewSpotlight={setPreviewTemplate}
+        onQuickSelectStyle={setSelectedStyle}
+        selectedStyle={selectedStyle}
+      />
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -120,6 +149,8 @@ export const App: React.FC = () => {
           onToggleFavoritesOnly={() => setShowOnlyFavorites(!showOnlyFavorites)}
           filteredCount={filteredTemplates.length}
           totalCount={typedTemplates.length}
+          viewMode={viewMode}
+          onToggleViewMode={setViewMode}
         />
 
         {/* Template Grid */}
@@ -131,6 +162,9 @@ export const App: React.FC = () => {
           onUseTemplate={setEditorTemplate}
           onShowQR={setPreviewTemplate}
           onResetFilters={handleResetFilters}
+          viewMode={viewMode}
+          onPlaySong={handlePlaySong}
+          currentPlayingSongId={isAudioPlaying ? activeAudioTemplate?.id : undefined}
         />
 
         {/* Service Banner */}
@@ -146,7 +180,18 @@ export const App: React.FC = () => {
       {/* Footer */}
       <Footer />
 
-      {/* Interactive Mobile Phone Preview Modal with Real-time Music Player & QR Code */}
+      {/* Sticky Bottom Music Player */}
+      <GlobalMusicPlayer
+        currentTemplate={activeAudioTemplate}
+        isPlaying={isAudioPlaying}
+        onTogglePlay={() => setIsAudioPlaying(!isAudioPlaying)}
+        onClosePlayer={() => {
+          setIsAudioPlaying(false);
+          setActiveAudioTemplate(null);
+        }}
+      />
+
+      {/* Mobile Phone Simulator Preview Modal */}
       <PreviewModal
         template={previewTemplate}
         isOpen={Boolean(previewTemplate)}
@@ -159,7 +204,7 @@ export const App: React.FC = () => {
         }}
       />
 
-      {/* Quick Customizer Modal */}
+      {/* Quick Customizer Modal with VietQR and Wedding Countdown */}
       <QuickEditorModal
         template={editorTemplate}
         isOpen={Boolean(editorTemplate)}

@@ -11,6 +11,9 @@ interface TemplateGridProps {
   onUseTemplate: (template: Template) => void;
   onShowQR: (template: Template) => void;
   onResetFilters: () => void;
+  viewMode?: 'dense' | 'spacious';
+  onPlaySong?: (template: Template) => void;
+  currentPlayingSongId?: string;
 }
 
 const PAGE_SIZE = 12;
@@ -23,6 +26,9 @@ export const TemplateGrid: React.FC<TemplateGridProps> = ({
   onUseTemplate,
   onShowQR,
   onResetFilters,
+  viewMode = 'dense',
+  onPlaySong,
+  currentPlayingSongId,
 }) => {
   const [displayCount, setDisplayCount] = useState<number>(PAGE_SIZE);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -35,36 +41,40 @@ export const TemplateGrid: React.FC<TemplateGridProps> = ({
     setTimeout(() => {
       setDisplayCount((prev) => prev + PAGE_SIZE);
       setLoadingMore(false);
-    }, 300);
+    }, 250);
   };
 
   if (templates.length === 0) {
     return (
-      <div className="py-20 text-center bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
-        <div className="w-16 h-16 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-4">
-          <Sparkles className="w-8 h-8" />
+      <div className="py-20 text-center bg-white rounded-2xl border border-neutral-200/80 shadow-subtle p-8">
+        <div className="w-14 h-14 rounded-full bg-neutral-100 text-neutral-800 flex items-center justify-center mx-auto mb-4">
+          <Sparkles className="w-6 h-6 text-amber-500" />
         </div>
-        <h3 className="text-xl font-bold text-slate-800 font-serif mb-2">
+        <h3 className="text-lg font-bold text-neutral-900 font-display mb-1.5">
           Không tìm thấy mẫu thiệp phù hợp
         </h3>
-        <p className="text-sm text-slate-500 max-w-md mx-auto mb-6">
-          Thử thay đổi từ khóa tìm kiếm hoặc chọn danh mục khác để khám phá thêm nhiều mẫu thiệp đẹp.
+        <p className="text-xs sm:text-sm text-neutral-500 max-w-md mx-auto mb-5 font-sans">
+          Thử chọn phong cách khác hoặc xóa từ khóa tìm kiếm để khám phá thêm nhiều mẫu thiệp cưới đẹp.
         </p>
         <button
           onClick={onResetFilters}
-          className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-5 py-2.5 rounded-full transition-all"
+          className="inline-flex items-center gap-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs sm:text-sm font-medium px-5 py-2 rounded-xl transition-all font-display"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className="w-3.5 h-3.5" />
           <span>Đặt lại bộ lọc</span>
         </button>
       </div>
     );
   }
 
+  const gridClass = viewMode === 'spacious'
+    ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+    : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5';
+
   return (
-    <div className="space-y-10">
-      {/* Grid of Template Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="space-y-8">
+      {/* Template Cards Grid */}
+      <div className={gridClass}>
         {displayedTemplates.map((template) => (
           <TemplateCard
             key={template.id}
@@ -74,32 +84,34 @@ export const TemplateGrid: React.FC<TemplateGridProps> = ({
             onPreview={onPreview}
             onUseTemplate={onUseTemplate}
             onShowQR={onShowQR}
+            onPlaySong={onPlaySong}
+            isPlayingThisSong={currentPlayingSongId === template.id}
           />
         ))}
       </div>
 
-      {/* Pagination / Load More Button */}
-      <div className="text-center pt-4">
+      {/* Load More Button */}
+      <div className="text-center pt-2">
         {hasMore ? (
           <button
             onClick={handleLoadMore}
             disabled={loadingMore}
-            className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-800 font-semibold px-8 py-3.5 rounded-full border border-slate-200 shadow-sm hover:shadow-md transition-all text-sm disabled:opacity-50"
+            className="inline-flex items-center gap-2 bg-white hover:bg-neutral-50 text-neutral-900 font-semibold px-7 py-3 rounded-xl border border-neutral-300 shadow-subtle hover:shadow-md transition-all text-xs sm:text-sm disabled:opacity-50 font-display"
           >
             {loadingMore ? (
               <>
-                <RefreshCw className="w-4 h-4 animate-spin text-rose-500" />
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-neutral-700" />
                 <span>Đang tải thêm...</span>
               </>
             ) : (
               <>
-                <span>Xem thêm mẫu thiệp ({templates.length - displayCount} mẫu còn lại)</span>
+                <span>Xem thêm ({templates.length - displayCount} mẫu tiếp theo)</span>
               </>
             )}
           </button>
         ) : (
-          <p className="text-xs text-slate-400 italic">
-            Đã hiển thị tất cả {templates.length} mẫu thiệp
+          <p className="text-xs text-neutral-400 font-mono italic">
+            &bull; Đã hiển thị trọn vẹn toàn bộ {templates.length} mẫu thiệp &bull;
           </p>
         )}
       </div>
