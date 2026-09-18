@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import { Template } from '../types/template';
 import { formatCount, getAssetUrl } from '../utils/formatters';
 import { AudioPlayerPill } from './AudioPlayerPill';
+import { getPublicBaseUrl } from '../utils/share';
 
 interface PreviewModalProps {
   template: Template | null;
@@ -28,7 +29,9 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
 
   useEffect(() => {
     if (template && isOpen) {
-      const shareUrl = window.location.origin + '?template=' + template.slug;
+      const base = getPublicBaseUrl();
+      const cleanBase = base.endsWith('/') ? base : base + '/';
+      const shareUrl = `${cleanBase}?template=${template.slug}`;
       QRCode.toDataURL(shareUrl, { width: 240, margin: 2, color: { dark: '#171717', light: '#ffffff' } })
         .then(setQrCodeUrl)
         .catch(console.error);
@@ -51,7 +54,9 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
   const imgUrl = getAssetUrl(template.longThumbnail || template.thumbnail);
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.origin + '?template=' + template.slug);
+    const base = getPublicBaseUrl();
+    const cleanBase = base.endsWith('/') ? base : base + '/';
+    navigator.clipboard.writeText(`${cleanBase}?template=${template.slug}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };

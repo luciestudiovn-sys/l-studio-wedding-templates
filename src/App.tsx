@@ -6,11 +6,13 @@ import { TemplateGrid } from './components/TemplateGrid';
 import { ServiceBanner } from './components/ServiceBanner';
 import { Footer } from './components/Footer';
 import { PreviewModal } from './components/PreviewModal';
-import { QuickEditorModal } from './components/QuickEditorModal';
+import { QuickEditorModal, PhotoPlacement } from './components/QuickEditorModal';
+import { LiveInvitationView } from './components/LiveInvitationView';
 import { GlobalMusicPlayer } from './components/GlobalMusicPlayer';
 import templatesData from './data/templates.json';
-import { Template, SortOption } from './types/template';
+import { Template, SortOption, CoupleInfo } from './types/template';
 import { getFavoriteIds, toggleFavoriteId } from './utils/storage';
+import { parseInvitationFromUrl } from './utils/share';
 
 const typedTemplates: Template[] = templatesData as Template[];
 
@@ -27,12 +29,37 @@ export const App: React.FC = () => {
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [editorTemplate, setEditorTemplate] = useState<Template | null>(null);
 
+  // Standalone Full-Screen Guest Invitation View state
+  const [liveInvitation, setLiveInvitation] = useState<{
+    template: Template;
+    coupleInfo: CoupleInfo;
+    photoPlacement: PhotoPlacement;
+  } | null>(null);
+
   // Global Audio Player state
   const [activeAudioTemplate, setActiveAudioTemplate] = useState<Template | null>(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
 
-  // Check URL query param for direct template preview (?template=slug)
+  // Check URL query parameters on load
   useEffect(() => {
+    // 1. Check if guest is opening a shared invitation link (?view=invitation&...)
+    const parsed = parseInvitationFromUrl();
+    if (parsed.isInvitationView && parsed.coupleInfo) {
+      const match =
+        typedTemplates.find(
+          (t) => t.id === parsed.templateId || t.slug === parsed.templateSlug
+        ) || typedTemplates[0];
+      if (match) {
+        setLiveInvitation({
+          template: match,
+          coupleInfo: parsed.coupleInfo,
+          photoPlacement: parsed.photoPlacement,
+        });
+        return;
+      }
+    }
+
+    // 2. Check if user clicked direct template preview link (?template=slug)
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('template');
     if (slug) {
@@ -110,6 +137,26 @@ export const App: React.FC = () => {
     setShowOnlyFavorites(false);
   };
 
+  // IF GUEST IS VIEWING A CUSTOMIZED INVITATION
+  if (liveInvitation) {
+    return (
+      <LiveInvitationView
+        template={liveInvitation.template}
+        coupleInfo={liveInvitation.coupleInfo}
+        photoPlacement={liveInvitation.photoPlacement}
+        onBackToStudio={() => {
+          setLiveInvitation(null);
+          try {
+            const url = new URL(window.location.href);
+            url.search = '';
+            window.history.pushState({}, '', url.pathname);
+          } catch (e) {}
+        }}
+      />
+    );
+  }
+
+  // STANDARD L-STUDIO CATALOG VIEW
   return (
     <div className="min-h-screen flex flex-col bg-[#faf9f6] text-neutral-800 selection:bg-neutral-200 selection:text-neutral-900 font-sans">
       {/* Header */}
@@ -209,6 +256,10 @@ export const App: React.FC = () => {
         template={editorTemplate}
         isOpen={Boolean(editorTemplate)}
         onClose={() => setEditorTemplate(null)}
+        onOpenLiveInvitation={(tmpl, cInfo, placement) => {
+          setEditorTemplate(null);
+          setLiveInvitation({ template: tmpl, coupleInfo: cInfo, photoPlacement: placement });
+        }}
       />
     </div>
   );
