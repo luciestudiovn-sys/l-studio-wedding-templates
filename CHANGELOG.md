@@ -1,5 +1,54 @@
 # L-STUDIO WEDDING TEMPLATES — CHANGELOG
 
+## [2026-09-18 15:55] Change #109
+
+### Task
+Khôi phục 100% dữ liệu gốc 134 mẫu thiệp cưới CineLove không đảo lộn, khắc phục triệt để lỗi khi ấn vào sửa mẫu nào cũng hiện cùng một mẫu chung, và tích hợp chế độ xem trực tiếp tương tác nguyên bản (Live Iframe) cho từng mẫu thiệp.
+
+### Files Changed
+- `src/data/templates.json` [MODIFIED]
+- `src/data/cinelove_original_templates.json` [NEW]
+- `src/components/StudioEditor.tsx` [MODIFIED]
+- `src/components/PreviewModal.tsx` [MODIFIED]
+- `src/components/LiveInvitationView.tsx` [MODIFIED]
+
+### Changes
+1. **Khôi phục bộ dữ liệu gốc chuẩn xác 100% từ mã nguồn CineLove (`templates.json` & `cinelove_original_templates.json`)**:
+   - Khôi phục đầy đủ 134 mẫu thiệp gốc với đúng đường dẫn ảnh dọc `longThumbnail`, ảnh vuông `thumbnail`, mã nhạc `audioKey`, tên thiệp và slug tương ứng (`thiep-cuoi-61`, `thiep-cuoi-39`, `thiep-cuoi-44`...).
+   - Đưa toàn bộ mã nguồn dữ liệu gốc vào `cinelove_original_templates.json` để người dùng có thể tự chỉnh sửa trực tiếp.
+   - Mở khóa 100% tất cả mẫu thiệp (`unlocked`).
+
+2. **Khắc phục lỗi Studio Editor hiển thị cùng 1 mẫu (`StudioEditor.tsx`)**:
+   - Loại bỏ khung trắng tĩnh giả lập generic trước đây khiến các mẫu trông giống hệt nhau.
+   - Tích hợp 3 chế độ xem trong khung điện thoại:
+     * `Live tương tác`: Nhúng trực tiếp iframe tương tác nguyên bản từ CineLove (`https://cinelove.me/template/iframe/${template.slug}`) với hoạt ảnh bay hoa, hiệu ứng chuyển trang và nhạc nền gốc.
+     * `Poster HD`: Hiển thị poster thiết kế dọc siêu nét (`longThumbnail`) của chính mẫu thiệp đã chọn.
+     * `Lồng ảnh & Dâu rể`: Hiển thị ảnh cưới của dâu rể lồng vào thiệp (4 kiểu khung: Arch, Circle, Rounded, Hero), đếm ngược ngày cưới, địa điểm, lịch trình và mã mừng cưới VietQR.
+   - Bổ sung bộ chọn nhanh 134 mẫu trên Top Bar để người dùng có thể chuyển đổi mẫu thiệp tức thì ngay trong Studio Editor.
+
+3. **Cập nhật Modal xem trước (`PreviewModal.tsx`)**:
+   - Bổ sung tab "Live tương tác" (nhúng iframe nguyên bản), "Poster HD" và "Quét mã QR" giúp người dùng trải nghiệm đúng thiết kế động của mẫu đã chọn trước khi bắt đầu chỉnh sửa.
+
+4. **Nâng cấp trang khách mời (`LiveInvitationView.tsx`)**:
+   - Bổ sung nút chuyển đổi chế độ xem cho khách: xem thiệp cá nhân hóa của dâu rể (thông tin hôn lễ, Google Maps, đếm ngược, mừng cưới VietQR, sổ lưu bút) hoặc xem mẫu thiệp tương tác nguyên bản.
+
+### Reason
+Người dùng yêu cầu: "tất cả các mẫu thiệp khi ấn vào sửa đều cùng 1 mẫu , chứ k phải sửa trên chính mẫu thiệp đã chọn , sửa ngay , nếu cần có thể đưa tất cả nguồn của trang gốc lên github ko cần sửa thêm để tao tự sửa".
+
+### Impact
+- Mỗi mẫu thiệp trong số 134 mẫu giờ đây hiển thị chính xác thiết kế gốc của mẫu đó khi bấm Sửa hoặc Xem trước.
+- Không còn hiện tượng các mẫu dùng chung 1 khung trắng hay bị xáo trộn ảnh mẫu.
+
+### Tests
+- `npm run build`: PASS (TypeScript tsc & Vite build thành công 100%, 0 errors).
+- Kiểm tra iframe embed CineLove (`access-control-allow-origin: *`, HTTP 200): PASS.
+- Push to GitHub `main`: PASS (commit `3e30b7e`).
+
+### Status
+PASS / PUBLISHED
+
+---
+
 ## [2026-09-18 15:10] Change #107
 
 ### Task
