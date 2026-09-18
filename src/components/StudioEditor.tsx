@@ -12,6 +12,7 @@ import QRCode from 'qrcode';
 import { Template, CoupleInfo } from '../types/template';
 import { getAssetUrl, getAudioUrl } from '../utils/formatters';
 import { buildInvitationUrl } from '../utils/share';
+import { getTemplateTheme } from '../utils/templateTheme';
 
 export type PhotoPlacement = 'arch' | 'circle' | 'rounded' | 'hero';
 export type PhoneDisplayMode = 'live' | 'poster' | 'customized';
@@ -78,7 +79,8 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
   const [photoPlacement, setPhotoPlacement] = useState<PhotoPlacement>('arch');
   const [photoZoom, setPhotoZoom] = useState<number>(1);
   const [canvasScale, setCanvasScale] = useState<number>(1);
-  const [displayMode, setDisplayMode] = useState<PhoneDisplayMode>('live');
+  const [displayMode, setDisplayMode] = useState<PhoneDisplayMode>('customized');
+  const templateTheme = useMemo(() => getTemplateTheme(template), [template]);
 
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -854,18 +856,29 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
           {/* Subtle Background Glow */}
           <div className="absolute w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
 
-          {/* VIEW MODE SEGMENTED CONTROL (Switch between Live Iframe, Poster HD, and Custom) */}
+          {/* VIEW MODE SEGMENTED CONTROL (Switch between Custom, Live Iframe, and Poster HD) */}
           <div className="flex items-center justify-center gap-1 mb-3 bg-[#161922] p-1 rounded-xl border border-neutral-800 text-xs z-20 shrink-0 shadow-lg">
             <button
-              onClick={() => setDisplayMode('live')}
+              onClick={() => setDisplayMode('customized')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
-                displayMode === 'live'
+                displayMode === 'customized'
                   ? 'bg-gradient-to-r from-amber-500 to-rose-600 text-white font-semibold shadow-xs'
                   : 'text-neutral-400 hover:text-neutral-200'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Thiệp tương tác gốc (Live)</span>
+              <Wand2 className="w-3.5 h-3.5" />
+              <span>Chỉnh sửa theo mẫu này</span>
+            </button>
+            <button
+              onClick={() => setDisplayMode('live')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
+                displayMode === 'live'
+                  ? 'bg-neutral-700 text-white font-semibold shadow-xs'
+                  : 'text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Mẫu động gốc (CineLove)</span>
             </button>
             <button
               onClick={() => setDisplayMode('poster')}
@@ -876,18 +889,7 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
               }`}
             >
               <ImageIcon className="w-3.5 h-3.5" />
-              <span>Thiết kế dọc gốc (Poster)</span>
-            </button>
-            <button
-              onClick={() => setDisplayMode('customized')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
-                displayMode === 'customized'
-                  ? 'bg-neutral-700 text-white font-semibold shadow-xs'
-                  : 'text-neutral-400 hover:text-neutral-200'
-              }`}
-            >
-              <Wand2 className="w-3.5 h-3.5" />
-              <span>Lồng ảnh &amp; Dâu rể</span>
+              <span>Poster HD dọc</span>
             </button>
           </div>
 
@@ -942,40 +944,54 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                   </div>
                 )}
 
-                {/* MODE 3: CUSTOMIZED WEDDING INVITATION OVERLAY */}
+                {/* MODE 3: CUSTOMIZED WEDDING INVITATION OVERLAY ON SELECTED TEMPLATE */}
                 {displayMode === 'customized' && (
                   <div
                     ref={phoneCaptureRef}
-                    className="flex-1 overflow-y-auto preview-scrollbar relative bg-white pb-10 select-none"
+                    className={`flex-1 overflow-y-auto preview-scrollbar relative bg-gradient-to-b ${templateTheme.bgGradient} ${templateTheme.textColor} ${templateTheme.fontFamily} pb-10 select-none`}
                   >
-                    {/* Template Header Art */}
-                    <div className="bg-neutral-50 pt-5 pb-3 px-4 text-center border-b border-neutral-100 relative">
-                      <div className="inline-block px-2.5 py-0.5 rounded-full bg-neutral-900 text-white font-mono text-[9px] uppercase tracking-wider mb-2">
-                        {template.templateName} &bull; L-STUDIO
+                    {/* Authentic Template Banner Artwork Header */}
+                    <div className="relative w-full h-44 sm:h-48 overflow-hidden bg-neutral-900">
+                      <img
+                        src={templateCoverImg}
+                        alt={template.templateName}
+                        className="w-full h-full object-cover object-top filter brightness-[0.82]"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-4 text-center">
+                        <span className="text-[10px] uppercase font-mono tracking-[0.25em] text-white/80 font-semibold mb-1">
+                          SAVE THE DATE &bull; LỄ THÀNH HÔN
+                        </span>
+                        <h2 className="text-xl sm:text-2xl font-bold font-display text-white tracking-tight drop-shadow-md">
+                          {coupleInfo.groomName || 'Chú rể'}
+                          <span className="text-amber-300 font-serif font-light text-base mx-1.5">&amp;</span>
+                          {coupleInfo.brideName || 'Cô dâu'}
+                        </h2>
                       </div>
+                      {/* Template Badge */}
+                      <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-mono border border-white/20 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-amber-300" />
+                        <span>{template.templateName}</span>
+                      </div>
+                    </div>
 
-                      <h2 className="text-xl font-bold font-display text-neutral-900 tracking-tight leading-snug">
-                        {coupleInfo.groomName || 'Chú rể'}
-                        <span className="block text-neutral-400 font-serif font-light text-base my-0.5">&amp;</span>
-                        {coupleInfo.brideName || 'Cô dâu'}
-                      </h2>
-
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-bold mt-1">
-                        SAVE THE DATE &bull; LỄ THÀNH HÔN
-                      </p>
-
-                      {/* Countdown Badge */}
-                      {daysRemaining !== null && (
-                        <div className="mt-2 inline-block px-3 py-0.5 rounded-full bg-neutral-900 text-white text-[10px] font-mono shadow-xs">
-                          Còn {daysRemaining} ngày nữa
-                        </div>
-                      )}
+                    {/* Subheader info: countdown & theme badge */}
+                    <div className="pt-3 pb-2 px-4 text-center space-y-2">
+                      <div className="flex items-center justify-center gap-2">
+                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono ${templateTheme.badgeBg} ${templateTheme.badgeText}`}>
+                          {templateTheme.name}
+                        </span>
+                        {daysRemaining !== null && (
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono ${templateTheme.badgeBg} ${templateTheme.badgeText}`}>
+                            Còn {daysRemaining} ngày nữa
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Couple Photo Container styled by placement */}
-                    <div className="p-4 bg-neutral-100 flex items-center justify-center relative overflow-hidden">
+                    <div className="p-4 flex items-center justify-center relative overflow-hidden">
                       {photoPlacement === 'arch' ? (
-                        <div className="w-56 aspect-[3/4] rounded-t-full rounded-b-xl overflow-hidden shadow-md border-4 border-white bg-white relative">
+                        <div className={`w-56 aspect-[3/4] rounded-t-full rounded-b-2xl overflow-hidden shadow-xl border-4 ${templateTheme.borderColor} bg-white/10 relative`}>
                           <img
                             src={displayPhoto}
                             alt="Ảnh dâu rể"
@@ -985,7 +1001,7 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                           />
                         </div>
                       ) : photoPlacement === 'circle' ? (
-                        <div className="w-52 h-52 rounded-full overflow-hidden shadow-md border-4 border-white bg-white relative">
+                        <div className={`w-52 h-52 rounded-full overflow-hidden shadow-xl border-4 ${templateTheme.borderColor} bg-white/10 relative`}>
                           <img
                             src={displayPhoto}
                             alt="Ảnh dâu rể"
@@ -995,7 +1011,7 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                           />
                         </div>
                       ) : photoPlacement === 'rounded' ? (
-                        <div className="w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-md border-2 border-white bg-white relative">
+                        <div className={`w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-xl border-2 ${templateTheme.borderColor} bg-white/10 relative`}>
                           <img
                             src={displayPhoto}
                             alt="Ảnh dâu rể"
@@ -1006,7 +1022,7 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                         </div>
                       ) : (
                         /* Hero Full */
-                        <div className="w-full aspect-[3/4] overflow-hidden relative">
+                        <div className="w-full aspect-[3/4] overflow-hidden rounded-2xl shadow-xl relative">
                           <img
                             src={displayPhoto}
                             alt="Ảnh dâu rể"
@@ -1014,65 +1030,85 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                             style={{ transform: `scale(${photoZoom})` }}
                             className="w-full h-full object-cover object-top transition-transform duration-300"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                         </div>
                       )}
                     </div>
 
                     {/* Wedding Ceremony & Venue Details */}
-                    <div className="p-4 sm:p-5 text-center space-y-3 bg-white text-xs">
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
+                    <div className="px-4 space-y-3 text-center text-xs">
+                      {/* Ceremony Time */}
+                      <div className={`p-4 rounded-2xl border ${templateTheme.borderColor} ${templateTheme.cardBg} space-y-1 shadow-sm`}>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider block ${templateTheme.subtextColor}`}>
                           HÔN LỄ ĐƯỢC TỔ CHỨC VÀO LÚC
                         </span>
-                        <p className="text-lg font-bold font-display text-neutral-900">
+                        <p className={`text-xl font-bold font-display ${templateTheme.textColor}`}>
                           {coupleInfo.weddingTime} &bull; {coupleInfo.weddingDate}
                         </p>
                         {coupleInfo.lunarDate && (
-                          <p className="text-[11px] text-neutral-500 font-serif italic -mt-0.5">
+                          <p className={`text-[11px] font-serif italic ${templateTheme.subtextColor}`}>
                             (Tức ngày {coupleInfo.lunarDate})
                           </p>
                         )}
                       </div>
 
-                      <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-center space-y-0.5">
-                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
+                      {/* Venue */}
+                      <div className={`p-4 rounded-2xl border ${templateTheme.borderColor} ${templateTheme.cardBg} space-y-1 shadow-sm`}>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider block ${templateTheme.subtextColor}`}>
                           ĐỊA ĐIỂM TIỆC CƯỚI
                         </span>
-                        <h4 className="font-bold text-neutral-900 text-xs font-display">
+                        <h4 className={`font-bold text-sm font-display ${templateTheme.textColor}`}>
                           {coupleInfo.venueName}
                         </h4>
-                        <p className="text-[11px] text-neutral-600 font-sans leading-relaxed">
+                        <p className={`text-[11px] font-sans leading-relaxed ${templateTheme.subtextColor}`}>
                           {coupleInfo.venueAddress}
                         </p>
                       </div>
 
                       {/* Invitation Message Quote */}
-                      <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-[11px] italic text-neutral-700 leading-relaxed font-serif">
+                      <div className={`p-4 rounded-2xl border ${templateTheme.borderColor} ${templateTheme.cardBg} text-xs italic leading-relaxed font-serif ${templateTheme.textColor} shadow-sm`}>
                         &ldquo;{coupleInfo.invitationMessage}&rdquo;
                       </div>
 
                       {/* VietQR Bank Gift Box simulation */}
                       {coupleInfo.bankAccount && (
-                        <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-left px-1">
+                        <div className={`p-3.5 rounded-2xl border ${templateTheme.borderColor} ${templateTheme.cardBg} flex items-center justify-between text-left shadow-sm`}>
                           <div className="text-[10px]">
-                            <span className="block font-semibold text-neutral-800">Hộp mừng cưới số</span>
-                            <span className="font-mono text-neutral-500">{coupleInfo.bankAccount} ({coupleInfo.bankName?.toUpperCase()})</span>
-                            <span className="block text-[9px] text-neutral-400">{coupleInfo.bankOwner}</span>
+                            <span className={`block font-semibold ${templateTheme.textColor}`}>Hộp mừng cưới số</span>
+                            <span className={`font-mono ${templateTheme.accentColor}`}>{coupleInfo.bankAccount} ({coupleInfo.bankName?.toUpperCase()})</span>
+                            <span className={`block text-[9px] ${templateTheme.subtextColor}`}>{coupleInfo.bankOwner}</span>
                           </div>
                           {vietQrUrl && (
                             <img
                               src={vietQrUrl}
                               alt="VietQR"
                               crossOrigin="anonymous"
-                              className="w-12 h-12 object-contain rounded border border-neutral-200"
+                              className="w-12 h-12 object-contain rounded-lg border border-white/20 bg-white p-0.5"
                             />
                           )}
                         </div>
                       )}
 
-                      <div className="pt-2 text-[9px] text-neutral-400 font-mono tracking-wider text-center">
-                        <span>THIỆP CƯỚI THIẾT KẾ BỞI L-STUDIO</span>
+                      {/* Full Original Template Poster (High-Res Scroll) */}
+                      <div className={`p-4 rounded-2xl border ${templateTheme.borderColor} ${templateTheme.cardBg} text-center space-y-2 shadow-sm`}>
+                        <div className="flex items-center justify-between text-xs font-semibold">
+                          <span className={`flex items-center gap-1.5 ${templateTheme.textColor}`}>
+                            <ImageIcon className="w-3.5 h-3.5" />
+                            <span>Poster thiết kế gốc</span>
+                          </span>
+                          <span className={`text-[10px] font-mono ${templateTheme.subtextColor}`}>{template.slug}</span>
+                        </div>
+                        <div className="rounded-xl overflow-hidden border border-white/10 max-h-80 overflow-y-auto preview-scrollbar shadow-inner bg-black/20">
+                          <img
+                            src={templateCoverImg}
+                            alt={template.templateName}
+                            className="w-full h-auto object-cover select-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className={`pt-2 text-[9px] font-mono tracking-wider text-center ${templateTheme.subtextColor}`}>
+                        <span>THIỆP CƯỚI ĐỘC BẢN &bull; {template.templateName} &bull; L-STUDIO</span>
                       </div>
                     </div>
                   </div>

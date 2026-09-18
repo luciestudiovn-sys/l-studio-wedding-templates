@@ -6,6 +6,7 @@ import {
 import confetti from 'canvas-confetti';
 import { CoupleInfo, Template } from '../types/template';
 import { getAssetUrl, getAudioUrl } from '../utils/formatters';
+import { getTemplateTheme } from '../utils/templateTheme';
 
 interface LiveInvitationViewProps {
   template: Template;
@@ -190,54 +191,11 @@ export const LiveInvitationView: React.FC<LiveInvitationViewProps> = ({
       )}`
     : '';
 
-  // Theme styling based on couple choice
-  const themeAccent = useMemo(() => {
-    switch (coupleInfo.themeColor) {
-      case 'rose':
-        return {
-          bg: 'from-rose-50 via-white to-pink-50',
-          badge: 'bg-rose-100 text-rose-800 border-rose-200',
-          btn: 'bg-rose-600 hover:bg-rose-700 text-white',
-          border: 'border-rose-200',
-          accent: 'text-rose-600',
-        };
-      case 'gold':
-        return {
-          bg: 'from-amber-50 via-white to-amber-100/40',
-          badge: 'bg-amber-100 text-amber-800 border-amber-200',
-          btn: 'bg-amber-600 hover:bg-amber-700 text-white',
-          border: 'border-amber-200',
-          accent: 'text-amber-600',
-        };
-      case 'emerald':
-        return {
-          bg: 'from-emerald-50 via-white to-teal-50',
-          badge: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-          btn: 'bg-emerald-700 hover:bg-emerald-800 text-white',
-          border: 'border-emerald-200',
-          accent: 'text-emerald-700',
-        };
-      case 'burgundy':
-        return {
-          bg: 'from-red-50 via-white to-rose-100/50',
-          badge: 'bg-red-100 text-red-900 border-red-200',
-          btn: 'bg-red-800 hover:bg-red-900 text-white',
-          border: 'border-red-200',
-          accent: 'text-red-800',
-        };
-      default:
-        return {
-          bg: 'from-neutral-100 via-white to-stone-100',
-          badge: 'bg-neutral-100 text-neutral-800 border-neutral-200',
-          btn: 'bg-neutral-900 hover:bg-neutral-800 text-white',
-          border: 'border-neutral-200',
-          accent: 'text-neutral-900',
-        };
-    }
-  }, [coupleInfo.themeColor]);
+  // Theme styling based on template and couple choice
+  const templateTheme = useMemo(() => getTemplateTheme(template), [template]);
 
   return (
-    <div className={`min-h-screen bg-gradient-to-b ${themeAccent.bg} text-neutral-800 selection:bg-neutral-200 font-sans pb-24`}>
+    <div className={`min-h-screen bg-gradient-to-b ${templateTheme.bgGradient} ${templateTheme.textColor} ${templateTheme.fontFamily} selection:bg-neutral-200 pb-24`}>
       {/* Hidden HTML Audio element */}
       <audio ref={audioRef} src={audioSrc} loop preload="auto" />
 
