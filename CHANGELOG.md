@@ -1,5 +1,40 @@
 # L-STUDIO WEDDING TEMPLATES — CHANGELOG
 
+## [2026-09-18 17:00] Change #110
+
+### Task
+Sửa dứt điểm việc mọi mẫu khi ấn vào sửa đều hiển thị cùng 1 mẫu trắng chung: Tự động gán theme và banner đồ họa thực tế của mẫu thiệp được chọn, đặt chế độ tùy biến trực tiếp làm mặc định khi mở Studio.
+
+### Files Changed
+- `src/utils/templateTheme.ts` [NEW]
+- `src/components/StudioEditor.tsx` [MODIFIED]
+- `src/components/LiveInvitationView.tsx` [MODIFIED]
+
+### Changes
+1. **Thiết lập bảng màu và phong cách độc bản cho từng mẫu thiệp (`src/utils/templateTheme.ts`)**:
+   - Tự động nhận diện và gán 5 chủ đề đồ họa chuyên biệt theo thiết kế thực tế:
+     * `Luxury Gold Hoàng Gia`: Nền đen huyền bí `#141210`, viền kim loại ánh vàng, điểm nhấn champagne.
+     * `Hồng Pastel Lãng Mạn`: Nền hoa hồng phấn `#fff5f6`, hoa văn cánh hoa, viền vàng hồng tinh tế.
+     * `Xanh Sage Tự Nhiên`: Nền lá cây bạch đàn `#f2f7f3`, viền xanh rừng cổ điển, họa tiết thực vật.
+     * `Vintage Cổ Điển`: Nền giấy cổ `#faf6ef`, hoa văn sáp niêm phong, sắc terracotta sang trọng.
+     * `Tối Giản Hiện Đại`: Phong cách monochrome kiến trúc sắc nét, tinh gọn.
+2. **Nâng cấp Studio Editor (`StudioEditor.tsx`)**:
+   - Đặt chế độ `customized` (Chỉnh sửa theo mẫu này) làm chế độ mặc định khi người dùng bấm "Tải ảnh & Sửa thiệp ngay".
+   - Tích hợp banner nghệ thuật thực tế từ `template.longThumbnail` ngay trên đầu thiệp.
+   - Hiển thị đầy đủ poster dọc chất lượng cao của chính mẫu thiệp đó ở phần dưới của thiệp.
+   - Dữ liệu dâu rể, thời gian, địa điểm, VietQR cập nhật tức thì trên phong cách của mẫu được chọn.
+3. **Đồng bộ trang khách mời (`LiveInvitationView.tsx`)**:
+   - Áp dụng cùng hệ thống `templateTheme` để thiệp khi gửi cho bạn bè phản ánh đúng 100% phong cách của mẫu đã chọn.
+
+### Tests
+- `npm run build`: PASS (TypeScript tsc & Vite v6.4.3 biên dịch thành công 100%, 0 lỗi, 1.30s).
+- Git push to GitHub `main`: PASS (commit `81aa14f`).
+
+### Status
+PASS / PUBLISHED
+
+---
+
 ## [2026-09-18 15:55] Change #109
 
 ### Task
