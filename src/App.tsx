@@ -6,7 +6,7 @@ import { TemplateGrid } from './components/TemplateGrid';
 import { ServiceBanner } from './components/ServiceBanner';
 import { Footer } from './components/Footer';
 import { PreviewModal } from './components/PreviewModal';
-import { QuickEditorModal, PhotoPlacement } from './components/QuickEditorModal';
+import { StudioEditor, PhotoPlacement } from './components/StudioEditor';
 import { LiveInvitationView } from './components/LiveInvitationView';
 import { GlobalMusicPlayer } from './components/GlobalMusicPlayer';
 import templatesData from './data/templates.json';
@@ -25,7 +25,7 @@ export const App: React.FC = () => {
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(getFavoriteIds);
   const [viewMode, setViewMode] = useState<'dense' | 'spacious'>('dense');
 
-  // Modals state
+  // Modals & Navigation state
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [editorTemplate, setEditorTemplate] = useState<Template | null>(null);
 
@@ -137,7 +137,22 @@ export const App: React.FC = () => {
     setShowOnlyFavorites(false);
   };
 
-  // IF GUEST IS VIEWING A CUSTOMIZED INVITATION
+  // 1. FULL-PAGE STUDIO EDITOR (CineLove style full-screen workspace)
+  if (editorTemplate) {
+    return (
+      <StudioEditor
+        template={editorTemplate}
+        allTemplates={typedTemplates}
+        onBack={() => setEditorTemplate(null)}
+        onPreviewLive={(tmpl, info, placement) => {
+          setLiveInvitation({ template: tmpl, coupleInfo: info, photoPlacement: placement });
+        }}
+        onSelectTemplate={setEditorTemplate}
+      />
+    );
+  }
+
+  // 2. FULL-PAGE GUEST INVITATION VIEW
   if (liveInvitation) {
     return (
       <LiveInvitationView
@@ -156,7 +171,7 @@ export const App: React.FC = () => {
     );
   }
 
-  // STANDARD L-STUDIO CATALOG VIEW
+  // 3. STANDARD L-STUDIO CATALOG VIEW
   return (
     <div className="min-h-screen flex flex-col bg-[#faf9f6] text-neutral-800 selection:bg-neutral-200 selection:text-neutral-900 font-sans">
       {/* Header */}
@@ -248,17 +263,6 @@ export const App: React.FC = () => {
         onUseTemplate={(t) => {
           setPreviewTemplate(null);
           setEditorTemplate(t);
-        }}
-      />
-
-      {/* Quick Customizer Modal with VietQR and Wedding Countdown */}
-      <QuickEditorModal
-        template={editorTemplate}
-        isOpen={Boolean(editorTemplate)}
-        onClose={() => setEditorTemplate(null)}
-        onOpenLiveInvitation={(tmpl, cInfo, placement) => {
-          setEditorTemplate(null);
-          setLiveInvitation({ template: tmpl, coupleInfo: cInfo, photoPlacement: placement });
         }}
       />
     </div>

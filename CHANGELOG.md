@@ -59,3 +59,31 @@ Người dùng phản ánh: "phần tải ảnh + sửa thiệp đang ko sửa t
 
 ### Status
 DONE
+
+## [2026-09-18 15:28] Change #108
+
+### Task
+Nâng cấp giao diện chỉnh sửa thiệp thành Studio Editor toàn màn hình chuẩn theo đúng layout & phong cách CineLove (Khung điện thoại trung tâm cuộn mẫu thiệp dọc thực tế + bảng công cụ trực quan bên trái).
+
+### Files Changed
+- `src/components/StudioEditor.tsx` [NEW]
+- `src/App.tsx` [MODIFIED]
+
+### Changes
+1. **Trình Studio Editor toàn màn hình (`StudioEditor.tsx`)**:
+   - Thanh điều khiển trên cùng (Top Bar): Nút Thoát Studio, Tên mẫu thiệp & Popover chuyển đổi nhanh giữa 134 mẫu, Trình phát nhạc nền đám cưới, Bộ thu phóng kích thước hiển thị (80%, 100%, 120%), Nút Xuất ảnh HD PNG 2.5x, Nút Xem trước khách mời, và Nút Xuất bản & Lấy link thiệp.
+   - Bảng công cụ chỉnh sửa bên trái (Left Sidebar):
+     * Ảnh cưới & Bìa mẫu (Tải ảnh từ máy, dán URL ảnh, 4 kiểu lồng khung Arch/Rounded/Circle/Hero, thu phóng).
+     * Thông tin Cô dâu & Chú rể.
+     * Lễ cưới & Tiệc chiêu đãi (Ngày giờ Dương lịch & Âm lịch, Tên nhà hàng, Địa chỉ chi tiết).
+     * Thư ngỏ & AI gợi ý câu từ theo 4 phong cách.
+     * Hộp mừng cưới số VietQR (Ngân hàng, STK, Tên chủ thẻ, preview mã QR).
+     * Cài đặt & Tông màu chủ đạo.
+   - Khu vực làm việc trung tâm (Center Canvas Workspace):
+     * Khung mô phỏng iPhone cao cấp đặt ở trung tâm với đổ bóng chiều sâu.
+     * Cuộn xem trực tiếp toàn bộ thiệp cưới dọc thực tế của mẫu được chọn (`template.longThumbnail`), ảnh dâu rể, đếm ngược ngày cưới, thông tin tiệc cưới và mã VietQR được cập nhật theo thời gian thực.
+2. **Tích hợp vào điều hướng ứng dụng (`App.tsx`)**:
+   - Khi bấm "Tải ảnh & Sửa thiệp ngay" trên bất kỳ thẻ mẫu nào hoặc trên Header, hệ thống chuyển sang chế độ Studio toàn màn hình mượt mà, chuyên nghiệp.
+
+### Status
+DONE / PUBLISHED
