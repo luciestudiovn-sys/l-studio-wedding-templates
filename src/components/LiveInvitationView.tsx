@@ -33,6 +33,7 @@ export const LiveInvitationView: React.FC<LiveInvitationViewProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [copiedBank, setCopiedBank] = useState<boolean>(false);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
+  const [viewMode, setViewMode] = useState<'custom' | 'original'>('custom');
 
   // Guest RSVP Form
   const [guestName, setGuestName] = useState<string>('');
@@ -275,8 +276,54 @@ export const LiveInvitationView: React.FC<LiveInvitationViewProps> = ({
         </div>
       </header>
 
-      {/* Main Guest Invitation Scrollable Container (Mobile-first width max-w-lg) */}
-      <main className="max-w-md mx-auto pt-20 px-4 space-y-6">
+      {/* Mode Switcher Pill */}
+      <div className="fixed top-16 inset-x-0 z-30 flex justify-center pointer-events-none">
+        <div className="pointer-events-auto inline-flex p-1 bg-white/95 backdrop-blur-md rounded-full border border-neutral-200 shadow-md text-xs font-semibold">
+          <button
+            onClick={() => setViewMode('custom')}
+            className={`px-3 py-1.5 rounded-full transition-all ${
+              viewMode === 'custom' ? 'bg-neutral-900 text-white shadow-xs' : 'text-neutral-600 hover:text-neutral-900'
+            }`}
+          >
+            Thiệp Dâu Rể &amp; Mừng Cưới
+          </button>
+          <button
+            onClick={() => setViewMode('original')}
+            className={`px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${
+              viewMode === 'original' ? 'bg-neutral-900 text-white shadow-xs' : 'text-neutral-600 hover:text-neutral-900'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>Mẫu gốc tương tác</span>
+          </button>
+        </div>
+      </div>
+
+      {viewMode === 'original' ? (
+        <div className="max-w-md mx-auto pt-28 px-4 pb-20 flex flex-col items-center">
+          <div className="w-full h-[780px] sm:h-[820px] bg-neutral-950 rounded-[44px] p-2.5 shadow-2xl border-2 border-neutral-700/80 flex flex-col relative">
+            {/* Dynamic island notch */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-5 bg-black rounded-full z-20 flex items-center justify-between px-2.5">
+              <div className="w-2 h-2 rounded-full bg-neutral-900 border border-neutral-800" />
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/70 animate-pulse" />
+            </div>
+
+            <div className="w-full h-full bg-white rounded-[36px] overflow-hidden relative">
+              <iframe
+                src={`https://cinelove.me/template/iframe/${template.slug}`}
+                title={template.templateName}
+                className="w-full h-full border-0 bg-white"
+                allow="autoplay; clipboard-write"
+              />
+            </div>
+          </div>
+          <p className="mt-4 text-xs text-neutral-500 text-center font-mono">
+            Hiển thị giao diện tương tác nguyên bản của mẫu: <strong className="text-neutral-800">{template.templateName}</strong>
+          </p>
+        </div>
+      ) : (
+        /* Main Guest Invitation Scrollable Container (Mobile-first width max-w-lg) */
+        <main className="max-w-md mx-auto pt-28 px-4 space-y-6">
         {/* HERO TITLE & MONOGRAM */}
         <section className="text-center pt-4 pb-2">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white shadow-md border border-neutral-200/80 mb-3">
@@ -660,6 +707,7 @@ export const LiveInvitationView: React.FC<LiveInvitationViewProps> = ({
           </p>
         </footer>
       </main>
+      )}
 
       {/* Floating Bottom Quick Action Bar */}
       <aside aria-label="Hành động nhanh" className="fixed bottom-3 inset-x-4 max-w-md mx-auto z-40 bg-neutral-900/90 backdrop-blur-md rounded-2xl p-2 px-3 shadow-2xl flex items-center justify-between text-white text-xs border border-white/10">

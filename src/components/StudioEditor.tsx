@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-  ArrowLeft, Eye, Download, Share2, Music, Volume2, VolumeX,
+  ArrowLeft, Eye, Download, Share2, Volume2, VolumeX,
   Upload, Image as ImageIcon, Trash2, Calendar, Clock, MapPin,
   CreditCard, Wand2, Bot, Palette, FileAudio, Check, Copy,
   CheckCircle2, ExternalLink, Sparkles, ChevronDown,
-  Layers, RefreshCw, X
+  Layers, RefreshCw, X, Music
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { toPng } from 'html-to-image';
@@ -14,6 +14,7 @@ import { getAssetUrl, getAudioUrl } from '../utils/formatters';
 import { buildInvitationUrl } from '../utils/share';
 
 export type PhotoPlacement = 'arch' | 'circle' | 'rounded' | 'hero';
+export type PhoneDisplayMode = 'live' | 'poster' | 'customized';
 
 interface StudioEditorProps {
   template: Template;
@@ -77,6 +78,8 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
   const [photoPlacement, setPhotoPlacement] = useState<PhotoPlacement>('arch');
   const [photoZoom, setPhotoZoom] = useState<number>(1);
   const [canvasScale, setCanvasScale] = useState<number>(1);
+  const [displayMode, setDisplayMode] = useState<PhoneDisplayMode>('live');
+
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const phoneCaptureRef = useRef<HTMLDivElement | null>(null);
@@ -160,6 +163,8 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
         if (ev.target?.result) {
           setCoupleInfo((prev) => ({ ...prev, coverImage: ev.target?.result as string }));
           setImageUrlInput('');
+          // Switch to customized mode so user sees their uploaded image immediately
+          setDisplayMode('customized');
         }
       };
       reader.readAsDataURL(file);
@@ -169,6 +174,7 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
   const handleApplyImageUrl = () => {
     if (imageUrlInput.trim()) {
       setCoupleInfo((prev) => ({ ...prev, coverImage: imageUrlInput.trim() }));
+      setDisplayMode('customized');
     }
   };
 
@@ -232,6 +238,11 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
 
   // Export HD PNG
   const handleExportPng = async () => {
+    if (displayMode === 'live') {
+      alert('Vui lòng chuyển sang tab "Bản vẽ dọc (Poster HD)" hoặc "Lồng ảnh & Dâu rể" để xuất ảnh PNG chất lượng cao');
+      setDisplayMode('poster');
+      return;
+    }
     if (!phoneCaptureRef.current) return;
     setIsExportingPng(true);
     try {
@@ -262,6 +273,9 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
       )}`
     : '';
 
+  // Original interactive template URL
+  const cineloveIframeSrc = `https://cinelove.me/template/iframe/${template.slug}`;
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#0f1115] text-neutral-100 font-sans select-none overflow-hidden">
       {/* Hidden Audio */}
@@ -291,16 +305,22 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span className="font-semibold truncate max-w-[180px]">{template.templateName}</span>
+              <span className="text-[10px] text-neutral-400 font-mono hidden md:inline">({template.slug})</span>
               <ChevronDown className="w-3 h-3 text-neutral-400" />
             </button>
 
             {/* Template picker popover */}
             {isSwitchingTemplate && (
-              <div className="absolute top-11 left-0 w-72 max-h-96 bg-[#1a1d26] border border-neutral-700 rounded-2xl shadow-2xl p-2.5 z-50 overflow-y-auto space-y-1 preview-scrollbar">
-                <span className="text-[10px] uppercase font-mono tracking-wider text-neutral-400 px-2 py-1 block">
-                  Đổi mẫu thiệp nhanh (134 mẫu)
-                </span>
-                {allTemplates.slice(0, 30).map((t) => (
+              <div className="absolute top-11 left-0 w-80 max-h-96 bg-[#1a1d26] border border-neutral-700 rounded-2xl shadow-2xl p-2.5 z-50 overflow-y-auto space-y-1 preview-scrollbar">
+                <div className="flex items-center justify-between px-2 py-1">
+                  <span className="text-[10px] uppercase font-mono tracking-wider text-neutral-400 font-bold">
+                    Chọn đúng mẫu để sửa ({allTemplates.length} mẫu)
+                  </span>
+                  <button onClick={() => setIsSwitchingTemplate(false)} className="text-neutral-500 hover:text-white">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                {allTemplates.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => {
@@ -314,11 +334,14 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                     <img
                       src={getAssetUrl(t.thumbnail)}
                       alt={t.templateName}
-                      className="w-9 h-11 object-cover rounded-md shrink-0 border border-neutral-600"
+                      className="w-10 h-12 object-cover rounded-md shrink-0 border border-neutral-600 bg-neutral-900"
                     />
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium truncate">{t.templateName}</p>
-                      <p className="text-[10px] text-neutral-400 truncate">{t.styleTag || 'Thiệp cưới'}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold truncate text-white">{t.templateName}</p>
+                      <p className="text-[10px] text-neutral-400 font-mono truncate">{t.slug}</p>
+                      <span className="inline-block text-[9px] px-1.5 py-0.2 rounded bg-neutral-800 text-amber-300 border border-neutral-700">
+                        {t.audioTitle || 'Marry You'}
+                      </span>
                     </div>
                   </button>
                 ))}
@@ -501,7 +524,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                       <button
                         key={opt.id}
                         type="button"
-                        onClick={() => setPhotoPlacement(opt.id as PhotoPlacement)}
+                        onClick={() => {
+                          setPhotoPlacement(opt.id as PhotoPlacement);
+                          setDisplayMode('customized');
+                        }}
                         className={`p-2.5 rounded-xl border text-left transition-all ${
                           photoPlacement === opt.id
                             ? 'bg-neutral-800 border-amber-500/80 text-white shadow-sm'
@@ -525,7 +551,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                     {[1, 1.15, 1.3].map((z) => (
                       <button
                         key={z}
-                        onClick={() => setPhotoZoom(z)}
+                        onClick={() => {
+                          setPhotoZoom(z);
+                          setDisplayMode('customized');
+                        }}
                         className={`flex-1 py-1.5 rounded-lg border text-xs font-mono transition-all ${
                           photoZoom === z
                             ? 'bg-neutral-800 border-amber-500/80 text-white font-bold'
@@ -550,7 +579,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                   <input
                     type="text"
                     value={coupleInfo.groomName}
-                    onChange={(e) => setCoupleInfo({ ...coupleInfo, groomName: e.target.value })}
+                    onChange={(e) => {
+                      setCoupleInfo({ ...coupleInfo, groomName: e.target.value });
+                      setDisplayMode('customized');
+                    }}
                     className="w-full px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-100 font-medium focus:ring-1 focus:ring-amber-500"
                     placeholder="Nguyễn Hoàng Nam"
                   />
@@ -563,7 +595,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                   <input
                     type="text"
                     value={coupleInfo.brideName}
-                    onChange={(e) => setCoupleInfo({ ...coupleInfo, brideName: e.target.value })}
+                    onChange={(e) => {
+                      setCoupleInfo({ ...coupleInfo, brideName: e.target.value });
+                      setDisplayMode('customized');
+                    }}
                     className="w-full px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-100 font-medium focus:ring-1 focus:ring-amber-500"
                     placeholder="Trần Mai Linh"
                   />
@@ -582,7 +617,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                     <input
                       type="date"
                       value={coupleInfo.weddingDate}
-                      onChange={(e) => setCoupleInfo({ ...coupleInfo, weddingDate: e.target.value })}
+                      onChange={(e) => {
+                        setCoupleInfo({ ...coupleInfo, weddingDate: e.target.value });
+                        setDisplayMode('customized');
+                      }}
                       className="w-full px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-100 font-mono focus:ring-1 focus:ring-amber-500"
                     />
                   </div>
@@ -593,7 +631,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                     <input
                       type="time"
                       value={coupleInfo.weddingTime}
-                      onChange={(e) => setCoupleInfo({ ...coupleInfo, weddingTime: e.target.value })}
+                      onChange={(e) => {
+                        setCoupleInfo({ ...coupleInfo, weddingTime: e.target.value });
+                        setDisplayMode('customized');
+                      }}
                       className="w-full px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-100 font-mono focus:ring-1 focus:ring-amber-500"
                     />
                   </div>
@@ -606,7 +647,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                   <input
                     type="text"
                     value={coupleInfo.lunarDate || ''}
-                    onChange={(e) => setCoupleInfo({ ...coupleInfo, lunarDate: e.target.value })}
+                    onChange={(e) => {
+                      setCoupleInfo({ ...coupleInfo, lunarDate: e.target.value });
+                      setDisplayMode('customized');
+                    }}
                     className="w-full px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-100 focus:ring-1 focus:ring-amber-500"
                     placeholder="15 tháng 09 năm Bính Ngọ"
                   />
@@ -619,7 +663,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                   <input
                     type="text"
                     value={coupleInfo.venueName}
-                    onChange={(e) => setCoupleInfo({ ...coupleInfo, venueName: e.target.value })}
+                    onChange={(e) => {
+                      setCoupleInfo({ ...coupleInfo, venueName: e.target.value });
+                      setDisplayMode('customized');
+                    }}
                     className="w-full px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-100 focus:ring-1 focus:ring-amber-500"
                     placeholder="Trung Tâm Tiệc Cưới White Palace"
                   />
@@ -632,7 +679,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                   <input
                     type="text"
                     value={coupleInfo.venueAddress}
-                    onChange={(e) => setCoupleInfo({ ...coupleInfo, venueAddress: e.target.value })}
+                    onChange={(e) => {
+                      setCoupleInfo({ ...coupleInfo, venueAddress: e.target.value });
+                      setDisplayMode('customized');
+                    }}
                     className="w-full px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-100 focus:ring-1 focus:ring-amber-500"
                     placeholder="194 Hoàng Văn Thụ, Phường 9, Phú Nhuận, TP.HCM"
                   />
@@ -659,6 +709,7 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                         const text = p.msg(coupleInfo.groomName, coupleInfo.brideName);
                         setCoupleInfo({ ...coupleInfo, invitationMessage: text });
                         setAiToneSelected(p.tone);
+                        setDisplayMode('customized');
                       }}
                       className={`p-2 rounded-xl text-left border transition-all ${
                         aiToneSelected === p.tone
@@ -674,7 +725,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                 <textarea
                   rows={4}
                   value={coupleInfo.invitationMessage}
-                  onChange={(e) => setCoupleInfo({ ...coupleInfo, invitationMessage: e.target.value })}
+                  onChange={(e) => {
+                    setCoupleInfo({ ...coupleInfo, invitationMessage: e.target.value });
+                    setDisplayMode('customized');
+                  }}
                   className="w-full px-3 py-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-100 leading-relaxed focus:ring-1 focus:ring-amber-500"
                   placeholder="Nhập thư ngỏ gửi khách mời..."
                 />
@@ -693,7 +747,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                     <label className="block text-[11px] text-neutral-400 mb-1">Ngân hàng</label>
                     <select
                       value={coupleInfo.bankName}
-                      onChange={(e) => setCoupleInfo({ ...coupleInfo, bankName: e.target.value })}
+                      onChange={(e) => {
+                        setCoupleInfo({ ...coupleInfo, bankName: e.target.value });
+                        setDisplayMode('customized');
+                      }}
                       className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-neutral-100"
                     >
                       {POPULAR_BANKS.map((b) => (
@@ -707,7 +764,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                     <input
                       type="text"
                       value={coupleInfo.bankAccount}
-                      onChange={(e) => setCoupleInfo({ ...coupleInfo, bankAccount: e.target.value })}
+                      onChange={(e) => {
+                        setCoupleInfo({ ...coupleInfo, bankAccount: e.target.value });
+                        setDisplayMode('customized');
+                      }}
                       className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-neutral-100 font-mono"
                       placeholder="Số tài khoản..."
                     />
@@ -718,7 +778,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                     <input
                       type="text"
                       value={coupleInfo.bankOwner}
-                      onChange={(e) => setCoupleInfo({ ...coupleInfo, bankOwner: e.target.value.toUpperCase() })}
+                      onChange={(e) => {
+                        setCoupleInfo({ ...coupleInfo, bankOwner: e.target.value.toUpperCase() });
+                        setDisplayMode('customized');
+                      }}
                       className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-neutral-100 uppercase font-mono"
                       placeholder="NGUYEN HOANG NAM"
                     />
@@ -747,7 +810,10 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
                       return (
                         <button
                           key={theme.id}
-                          onClick={() => setCoupleInfo({ ...coupleInfo, themeColor: theme.id })}
+                          onClick={() => {
+                            setCoupleInfo({ ...coupleInfo, themeColor: theme.id });
+                            setDisplayMode('customized');
+                          }}
                           className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition-all ${
                             isSelected
                               ? 'bg-neutral-800 border-amber-500 text-white shadow-xs'
@@ -784,14 +850,51 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
         {/* ============================================================ */}
         {/* CENTER PHONE WORKSPACE (CANVAS PREVIEW)                      */}
         {/* ============================================================ */}
-        <main className="flex-1 bg-[#0a0c10] flex items-center justify-center p-4 sm:p-8 overflow-y-auto relative">
+        <main className="flex-1 bg-[#0a0c10] flex flex-col items-center justify-center p-3 sm:p-6 overflow-y-auto relative">
           {/* Subtle Background Glow */}
           <div className="absolute w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+
+          {/* VIEW MODE SEGMENTED CONTROL (Switch between Live Iframe, Poster HD, and Custom) */}
+          <div className="flex items-center justify-center gap-1 mb-3 bg-[#161922] p-1 rounded-xl border border-neutral-800 text-xs z-20 shrink-0 shadow-lg">
+            <button
+              onClick={() => setDisplayMode('live')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
+                displayMode === 'live'
+                  ? 'bg-gradient-to-r from-amber-500 to-rose-600 text-white font-semibold shadow-xs'
+                  : 'text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Thiệp tương tác gốc (Live)</span>
+            </button>
+            <button
+              onClick={() => setDisplayMode('poster')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
+                displayMode === 'poster'
+                  ? 'bg-neutral-700 text-white font-semibold shadow-xs'
+                  : 'text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <ImageIcon className="w-3.5 h-3.5" />
+              <span>Thiết kế dọc gốc (Poster)</span>
+            </button>
+            <button
+              onClick={() => setDisplayMode('customized')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
+                displayMode === 'customized'
+                  ? 'bg-neutral-700 text-white font-semibold shadow-xs'
+                  : 'text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <Wand2 className="w-3.5 h-3.5" />
+              <span>Lồng ảnh &amp; Dâu rể</span>
+            </button>
+          </div>
 
           {/* Scalable Phone Container */}
           <div
             style={{ transform: `scale(${canvasScale})`, transformOrigin: 'center center' }}
-            className="transition-transform duration-200 ease-out"
+            className="transition-transform duration-200 ease-out z-10"
           >
             {/* iPhone Frame Simulator */}
             <div className="relative w-[320px] sm:w-[350px] h-[640px] sm:h-[680px] bg-neutral-900 rounded-[50px] p-3 shadow-2xl border-4 border-neutral-800 flex flex-col">
@@ -804,146 +907,176 @@ export const StudioEditor: React.FC<StudioEditorProps> = ({
               {/* Inner Phone Screen */}
               <div className="w-full h-full bg-white rounded-[40px] overflow-hidden relative flex flex-col text-neutral-900">
                 {/* Phone Status Bar */}
-                <div className="h-9 bg-white/90 backdrop-blur-sm w-full flex items-center justify-between px-6 pt-1 text-[11px] font-semibold text-neutral-800 z-20 shrink-0 select-none">
+                <div className="h-9 bg-white/95 backdrop-blur-sm w-full flex items-center justify-between px-6 pt-1 text-[11px] font-semibold text-neutral-800 z-20 shrink-0 select-none border-b border-neutral-100">
                   <span>9:41</span>
+                  <span className="text-[10px] font-mono text-neutral-500 truncate max-w-[120px]">{template.templateName}</span>
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-2 border border-neutral-800 rounded-sm" />
                   </div>
                 </div>
 
-                {/* SCROLLABLE INVITATION CANVAS (Capturable by html-to-image) */}
-                <div
-                  ref={phoneCaptureRef}
-                  className="flex-1 overflow-y-auto preview-scrollbar relative bg-white pb-10 select-none"
-                >
-                  {/* Template Header Art */}
-                  <div className="bg-neutral-50 pt-5 pb-3 px-4 text-center border-b border-neutral-100 relative">
-                    <div className="inline-block px-2.5 py-0.5 rounded-full bg-neutral-900 text-white font-mono text-[9px] uppercase tracking-wider mb-2">
-                      {template.templateName} &bull; L-STUDIO
-                    </div>
-
-                    <h2 className="text-xl font-bold font-display text-neutral-900 tracking-tight leading-snug">
-                      {coupleInfo.groomName || 'Chú rể'}
-                      <span className="block text-neutral-400 font-serif font-light text-base my-0.5">&amp;</span>
-                      {coupleInfo.brideName || 'Cô dâu'}
-                    </h2>
-
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-bold mt-1">
-                      SAVE THE DATE &bull; LỄ THÀNH HÔN
-                    </p>
-
-                    {/* Countdown Badge */}
-                    {daysRemaining !== null && (
-                      <div className="mt-2 inline-block px-3 py-0.5 rounded-full bg-neutral-900 text-white text-[10px] font-mono shadow-xs">
-                        Còn {daysRemaining} ngày nữa
-                      </div>
-                    )}
+                {/* MODE 1: 100% AUTHENTIC INTERACTIVE IFRAME DIRECTLY FROM ORIGINAL TEMPLATE */}
+                {displayMode === 'live' && (
+                  <div className="flex-1 w-full h-full relative overflow-hidden bg-neutral-950">
+                    <iframe
+                      key={template.slug}
+                      src={cineloveIframeSrc}
+                      className="w-full h-full border-0 select-auto"
+                      allow="autoplay; clipboard-write"
+                      title={template.templateName}
+                    />
                   </div>
+                )}
 
-                  {/* Couple Photo Container styled by placement */}
-                  <div className="p-4 bg-neutral-100 flex items-center justify-center relative overflow-hidden">
-                    {photoPlacement === 'arch' ? (
-                      <div className="w-56 aspect-[3/4] rounded-t-full rounded-b-xl overflow-hidden shadow-md border-4 border-white bg-white relative">
-                        <img
-                          src={displayPhoto}
-                          alt="Ảnh dâu rể"
-                          crossOrigin="anonymous"
-                          style={{ transform: `scale(${photoZoom})` }}
-                          className="w-full h-full object-cover object-top transition-transform duration-300"
-                        />
-                      </div>
-                    ) : photoPlacement === 'circle' ? (
-                      <div className="w-52 h-52 rounded-full overflow-hidden shadow-md border-4 border-white bg-white relative">
-                        <img
-                          src={displayPhoto}
-                          alt="Ảnh dâu rể"
-                          crossOrigin="anonymous"
-                          style={{ transform: `scale(${photoZoom})` }}
-                          className="w-full h-full object-cover object-center transition-transform duration-300"
-                        />
-                      </div>
-                    ) : photoPlacement === 'rounded' ? (
-                      <div className="w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-md border-2 border-white bg-white relative">
-                        <img
-                          src={displayPhoto}
-                          alt="Ảnh dâu rể"
-                          crossOrigin="anonymous"
-                          style={{ transform: `scale(${photoZoom})` }}
-                          className="w-full h-full object-cover object-top transition-transform duration-300"
-                        />
-                      </div>
-                    ) : (
-                      /* Hero Full */
-                      <div className="w-full aspect-[3/4] overflow-hidden relative">
-                        <img
-                          src={displayPhoto}
-                          alt="Ảnh dâu rể"
-                          crossOrigin="anonymous"
-                          style={{ transform: `scale(${photoZoom})` }}
-                          className="w-full h-full object-cover object-top transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                      </div>
-                    )}
+                {/* MODE 2: ORIGINAL FULL-LENGTH VERTICAL TEMPLATE POSTER (HIGH-RES WEBP) */}
+                {displayMode === 'poster' && (
+                  <div
+                    ref={phoneCaptureRef}
+                    className="flex-1 overflow-y-auto preview-scrollbar bg-neutral-100 select-none"
+                  >
+                    <img
+                      src={templateCoverImg}
+                      alt={template.templateName}
+                      className="w-full h-auto object-cover select-none"
+                    />
                   </div>
+                )}
 
-                  {/* Wedding Ceremony & Venue Details */}
-                  <div className="p-4 sm:p-5 text-center space-y-3 bg-white text-xs">
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
-                        HÔN LỄ ĐƯỢC TỔ CHỨC VÀO LÚC
-                      </span>
-                      <p className="text-lg font-bold font-display text-neutral-900">
-                        {coupleInfo.weddingTime} &bull; {coupleInfo.weddingDate}
+                {/* MODE 3: CUSTOMIZED WEDDING INVITATION OVERLAY */}
+                {displayMode === 'customized' && (
+                  <div
+                    ref={phoneCaptureRef}
+                    className="flex-1 overflow-y-auto preview-scrollbar relative bg-white pb-10 select-none"
+                  >
+                    {/* Template Header Art */}
+                    <div className="bg-neutral-50 pt-5 pb-3 px-4 text-center border-b border-neutral-100 relative">
+                      <div className="inline-block px-2.5 py-0.5 rounded-full bg-neutral-900 text-white font-mono text-[9px] uppercase tracking-wider mb-2">
+                        {template.templateName} &bull; L-STUDIO
+                      </div>
+
+                      <h2 className="text-xl font-bold font-display text-neutral-900 tracking-tight leading-snug">
+                        {coupleInfo.groomName || 'Chú rể'}
+                        <span className="block text-neutral-400 font-serif font-light text-base my-0.5">&amp;</span>
+                        {coupleInfo.brideName || 'Cô dâu'}
+                      </h2>
+
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-bold mt-1">
+                        SAVE THE DATE &bull; LỄ THÀNH HÔN
                       </p>
-                      {coupleInfo.lunarDate && (
-                        <p className="text-[11px] text-neutral-500 font-serif italic -mt-0.5">
-                          (Tức ngày {coupleInfo.lunarDate})
-                        </p>
+
+                      {/* Countdown Badge */}
+                      {daysRemaining !== null && (
+                        <div className="mt-2 inline-block px-3 py-0.5 rounded-full bg-neutral-900 text-white text-[10px] font-mono shadow-xs">
+                          Còn {daysRemaining} ngày nữa
+                        </div>
                       )}
                     </div>
 
-                    <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-center space-y-0.5">
-                      <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
-                        ĐỊA ĐIỂM TIỆC CƯỚI
-                      </span>
-                      <h4 className="font-bold text-neutral-900 text-xs font-display">
-                        {coupleInfo.venueName}
-                      </h4>
-                      <p className="text-[11px] text-neutral-600 font-sans leading-relaxed">
-                        {coupleInfo.venueAddress}
-                      </p>
-                    </div>
-
-                    {/* Invitation Message Quote */}
-                    <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-[11px] italic text-neutral-700 leading-relaxed font-serif">
-                      &ldquo;{coupleInfo.invitationMessage}&rdquo;
-                    </div>
-
-                    {/* VietQR Bank Gift Box simulation */}
-                    {coupleInfo.bankAccount && (
-                      <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-left px-1">
-                        <div className="text-[10px]">
-                          <span className="block font-semibold text-neutral-800">Hộp mừng cưới số</span>
-                          <span className="font-mono text-neutral-500">{coupleInfo.bankAccount} ({coupleInfo.bankName?.toUpperCase()})</span>
-                          <span className="block text-[9px] text-neutral-400">{coupleInfo.bankOwner}</span>
-                        </div>
-                        {vietQrUrl && (
+                    {/* Couple Photo Container styled by placement */}
+                    <div className="p-4 bg-neutral-100 flex items-center justify-center relative overflow-hidden">
+                      {photoPlacement === 'arch' ? (
+                        <div className="w-56 aspect-[3/4] rounded-t-full rounded-b-xl overflow-hidden shadow-md border-4 border-white bg-white relative">
                           <img
-                            src={vietQrUrl}
-                            alt="VietQR"
+                            src={displayPhoto}
+                            alt="Ảnh dâu rể"
                             crossOrigin="anonymous"
-                            className="w-12 h-12 object-contain rounded border border-neutral-200"
+                            style={{ transform: `scale(${photoZoom})` }}
+                            className="w-full h-full object-cover object-top transition-transform duration-300"
                           />
+                        </div>
+                      ) : photoPlacement === 'circle' ? (
+                        <div className="w-52 h-52 rounded-full overflow-hidden shadow-md border-4 border-white bg-white relative">
+                          <img
+                            src={displayPhoto}
+                            alt="Ảnh dâu rể"
+                            crossOrigin="anonymous"
+                            style={{ transform: `scale(${photoZoom})` }}
+                            className="w-full h-full object-cover object-center transition-transform duration-300"
+                          />
+                        </div>
+                      ) : photoPlacement === 'rounded' ? (
+                        <div className="w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-md border-2 border-white bg-white relative">
+                          <img
+                            src={displayPhoto}
+                            alt="Ảnh dâu rể"
+                            crossOrigin="anonymous"
+                            style={{ transform: `scale(${photoZoom})` }}
+                            className="w-full h-full object-cover object-top transition-transform duration-300"
+                          />
+                        </div>
+                      ) : (
+                        /* Hero Full */
+                        <div className="w-full aspect-[3/4] overflow-hidden relative">
+                          <img
+                            src={displayPhoto}
+                            alt="Ảnh dâu rể"
+                            crossOrigin="anonymous"
+                            style={{ transform: `scale(${photoZoom})` }}
+                            className="w-full h-full object-cover object-top transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Wedding Ceremony & Venue Details */}
+                    <div className="p-4 sm:p-5 text-center space-y-3 bg-white text-xs">
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
+                          HÔN LỄ ĐƯỢC TỔ CHỨC VÀO LÚC
+                        </span>
+                        <p className="text-lg font-bold font-display text-neutral-900">
+                          {coupleInfo.weddingTime} &bull; {coupleInfo.weddingDate}
+                        </p>
+                        {coupleInfo.lunarDate && (
+                          <p className="text-[11px] text-neutral-500 font-serif italic -mt-0.5">
+                            (Tức ngày {coupleInfo.lunarDate})
+                          </p>
                         )}
                       </div>
-                    )}
 
-                    <div className="pt-2 text-[9px] text-neutral-400 font-mono tracking-wider text-center">
-                      <span>THIỆP CƯỚI THIẾT KẾ BỞI L-STUDIO</span>
+                      <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-center space-y-0.5">
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
+                          ĐỊA ĐIỂM TIỆC CƯỚI
+                        </span>
+                        <h4 className="font-bold text-neutral-900 text-xs font-display">
+                          {coupleInfo.venueName}
+                        </h4>
+                        <p className="text-[11px] text-neutral-600 font-sans leading-relaxed">
+                          {coupleInfo.venueAddress}
+                        </p>
+                      </div>
+
+                      {/* Invitation Message Quote */}
+                      <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-[11px] italic text-neutral-700 leading-relaxed font-serif">
+                        &ldquo;{coupleInfo.invitationMessage}&rdquo;
+                      </div>
+
+                      {/* VietQR Bank Gift Box simulation */}
+                      {coupleInfo.bankAccount && (
+                        <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-left px-1">
+                          <div className="text-[10px]">
+                            <span className="block font-semibold text-neutral-800">Hộp mừng cưới số</span>
+                            <span className="font-mono text-neutral-500">{coupleInfo.bankAccount} ({coupleInfo.bankName?.toUpperCase()})</span>
+                            <span className="block text-[9px] text-neutral-400">{coupleInfo.bankOwner}</span>
+                          </div>
+                          {vietQrUrl && (
+                            <img
+                              src={vietQrUrl}
+                              alt="VietQR"
+                              crossOrigin="anonymous"
+                              className="w-12 h-12 object-contain rounded border border-neutral-200"
+                            />
+                          )}
+                        </div>
+                      )}
+
+                      <div className="pt-2 text-[9px] text-neutral-400 font-mono tracking-wider text-center">
+                        <span>THIỆP CƯỚI THIẾT KẾ BỞI L-STUDIO</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

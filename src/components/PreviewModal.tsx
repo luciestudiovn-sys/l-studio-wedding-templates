@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Heart, QrCode, Share2, Check, Smartphone, Music2, CheckCircle2, Upload } from 'lucide-react';
+import { X, Heart, QrCode, Share2, Check, Smartphone, Music2, CheckCircle2, Upload, Play } from 'lucide-react';
 import QRCode from 'qrcode';
 import { Template } from '../types/template';
 import { formatCount, getAssetUrl } from '../utils/formatters';
@@ -23,7 +23,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
   onToggleFavorite,
   onUseTemplate,
 }) => {
-  const [activeTab, setActiveTab] = useState<'preview' | 'qr'>('preview');
+  const [activeTab, setActiveTab] = useState<'live' | 'poster' | 'qr'>('live');
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [copied, setCopied] = useState(false);
 
@@ -97,7 +97,16 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
               </div>
 
               {/* Scrollable Invitation Content or QR Code */}
-              {activeTab === 'preview' ? (
+              {activeTab === 'live' ? (
+                <div className="flex-1 relative bg-neutral-900 overflow-hidden">
+                  <iframe
+                    src={`https://cinelove.me/template/iframe/${template.slug}`}
+                    title={template.templateName}
+                    className="w-full h-full border-0 bg-white"
+                    allow="autoplay; clipboard-write"
+                  />
+                </div>
+              ) : activeTab === 'poster' ? (
                 <div className="flex-1 overflow-y-auto preview-scrollbar relative bg-neutral-50">
                   <img
                     src={imgUrl}
@@ -145,18 +154,27 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
           {/* Toggle buttons under phone */}
           <div className="flex items-center gap-2 mt-4">
             <button
-              onClick={() => setActiveTab('preview')}
+              onClick={() => setActiveTab('live')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
-                activeTab === 'preview' ? 'bg-white text-neutral-900' : 'bg-white/10 text-neutral-300 hover:bg-white/20'
+                activeTab === 'live' ? 'bg-white text-neutral-900 shadow-sm' : 'bg-white/10 text-neutral-300 hover:bg-white/20'
+              }`}
+            >
+              <Play className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+              <span>Live tương tác</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('poster')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
+                activeTab === 'poster' ? 'bg-white text-neutral-900 shadow-sm' : 'bg-white/10 text-neutral-300 hover:bg-white/20'
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
-              <span>Xem trực tiếp</span>
+              <span>Poster HD</span>
             </button>
             <button
               onClick={() => setActiveTab('qr')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
-                activeTab === 'qr' ? 'bg-white text-neutral-900' : 'bg-white/10 text-neutral-300 hover:bg-white/20'
+                activeTab === 'qr' ? 'bg-white text-neutral-900 shadow-sm' : 'bg-white/10 text-neutral-300 hover:bg-white/20'
               }`}
             >
               <QrCode className="w-3.5 h-3.5" />
